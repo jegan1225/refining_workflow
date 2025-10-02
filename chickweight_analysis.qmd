@@ -13,11 +13,11 @@ bibliography: ref2.bib
 ---
 
 ## Objective
-Adapt the the simulations and analyses of the palmer penguins dataset to instead use the `ChickWeight` dataset that comes with R. The ChickWeight dataset tracks a number of chicks, their weights measured at regular intervals, and the diets that they were given.
+Adapt the simulations and analyses of the palmer penguins dataset to instead use the `ChickWeight` [@ChickWeightDataset] dataset that comes with R. The ChickWeight dataset tracks a number of chicks, their weights measured at regular intervals, and the diets that they were given. For consistency, we only look at chicks who have had their weights measured up till the 21st day.
 
 ```{r}
 #| echo: false
-chicks <- ChickWeight 
+chicks <- ChickWeight[ChickWeight$Chick %in% ChickWeight[ChickWeight$Time==21,]$Chick,]
 ```
 
 ```{r}
@@ -29,28 +29,35 @@ length(unique(chicks$Chick))
 #Number of diets
 length(unique(chicks$Diet))
 ```
-Number of chicks: 50
+Number of chicks: 45
 
 Number of different diets: 4
 
-
-First, we plot the weight of the chicks vs their age: 
 ```{r}
-plot(x = chicks$Time, 
-     y = chicks$weight,
-      main='Age vs Weight',
-      xlab = 'Age',
-      ylab = 'Weight')
+#| label: fig-weight-age
+#| fig-cap: "Chick Weight vs Age"
+plot(
+  x = chicks$Time,
+  y = chicks$weight, 
+  main = "Chick Weight vs Age",
+  xlab = "Age",
+  ylab = "Weight",
+  type='p')
 ```
+In @fig-weight-age, we observe the general progress of the weights of the chicks over the 21 days:
 
-Now, we create a table to observe how many chicks there are for each diet:
 ```{r}
-#CORRECT THIS LATER
-table(chicks$Diet)
+#| label: tbl-diet
+#| fig-cap: "Diet vs No. of Chicks"
+diet_counts <- table(chicks[chicks$Time==21,]$Diet)
+knitr::kable(diet_counts, col.names = c("Diet", "Count"))
 ```
+Next, in @tbl-diet, we observe how many chicks there are for each diet:
 
-Now, we plot a figure to observe the progress of the weights of the chicks for each diet:
+
 ```{r}
+#| label: fig-weight-age-diet
+#| fig-cap: "Chick Weight vs Age by Diet"
 plot(
   x = chicks$Time,
   y = chicks$weight, 
@@ -60,9 +67,11 @@ plot(
   col = chicks$Diet,
   type='p')
 ```
+Now, in @fig-weight-age-diet, we observe the progress of the weights of the chicks for each diet:
 
-We also do boxplots by diet to compare the weights of the chicks following each diet:
 ```{r}
+#| label: fig-boxplot
+#| fig-cap: "Chick Weight vs Age by Diet (Boxplot)"
 plot(
   x = chicks$Diet,
   y = chicks$weight, 
@@ -72,3 +81,35 @@ plot(
   col = c(2,3,4,5))
 abline(h = mean(chicks$weight,na.rm = TRUE), col = 2, lwd = 2)
 ```
+We also do boxplots by diet in @fig-boxplot to compare the weights of the chicks following each diet:
+
+```{r}
+#| label: tbl-linear
+#| fig-cap: "Coefficients of Linear Model"
+# fit linear model
+mass_lm <- lm(formula = weight ~ 1 + Time + Diet, chicks)
+
+# extract coefficients and standard errors
+mass_lm_coefficients <- summary(mass_lm)$coefficients[,1:2]
+knitr::kable(
+  x = round(mass_lm_coefficients, 2),
+  col.names = c("MLE", "Std. Err"))
+```
+Next, we fit a linear model of Age vs. Weight for each diet. The Coefficients and Standard errors are shown in @tbl-linear.
+
+```{r}
+#| layout-ncol: 2
+#| label: fig-qqplots
+#| fig-cap: "QQ-Plots of 21st Day weights for each Diet"
+#| fig-subcap: 
+#|   - "Diet 1"
+#|   - "Diet 2"
+#|   - "Diet 3"
+#|   - "Diet 4"
+twenty_first_weights <- chicks[chicks$Time==21,]
+for (i in 1:4){
+  qqnorm(chicks[chicks$Diet==i,]$weight, xlab='Theoretical Weights', ylab='Sample Weights')
+  qqline(chicks[chicks$Diet==i,]$weight)
+}
+```
+Finally, in @fig-qqplots, we observe the normal QQ-Plots of the 21st Day weights of the chicks following each of the 4 diets.
