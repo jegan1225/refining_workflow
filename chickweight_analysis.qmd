@@ -1,0 +1,74 @@
+---
+title: "Analysing the ChickWeight Dataset"
+subtitle: 'MSc in Statistics 2025/26, Imperial College London'
+author: "Jegan G G S"
+format:
+  html:
+    toc: true
+    highlight: tango
+    self-contained: true
+  pdf: default
+format-links: false
+bibliography: ref2.bib
+---
+
+## Objective
+Adapt the the simulations and analyses of the palmer penguins dataset to instead use the `ChickWeight` dataset that comes with R. The ChickWeight dataset tracks a number of chicks, their weights measured at regular intervals, and the diets that they were given.
+
+```{r}
+#| echo: false
+chicks <- ChickWeight 
+```
+
+```{r}
+#| echo: false
+#| output: false
+#Number of chicks:
+length(unique(chicks$Chick))
+
+#Number of diets
+length(unique(chicks$Diet))
+```
+Number of chicks: 50
+
+Number of different diets: 4
+
+
+First, we plot the weight of the chicks vs their age: 
+```{r}
+plot(x = chicks$Time, 
+     y = chicks$weight,
+      main='Age vs Weight',
+      xlab = 'Age',
+      ylab = 'Weight')
+```
+
+Now, we create a table to observe how many chicks there are for each diet:
+```{r}
+#CORRECT THIS LATER
+table(chicks$Diet)
+```
+
+Now, we plot a figure to observe the progress of the weights of the chicks for each diet:
+```{r}
+plot(
+  x = chicks$Time,
+  y = chicks$weight, 
+  main = "Chick Weight vs Age",
+  xlab = "Age",
+  ylab = "Weight",
+  col = chicks$Diet,
+  type='p')
+```
+
+We also do boxplots by diet to compare the weights of the chicks following each diet:
+```{r}
+plot(
+  x = chicks$Diet,
+  y = chicks$weight, 
+  main = "Chick Weight vs Diet",
+  xlab = "Diet",
+  ylab = "Weight",
+  col = c(2,3,4,5))
+abline(h = mean(chicks$weight,na.rm = TRUE), col = 2, lwd = 2)
+```
